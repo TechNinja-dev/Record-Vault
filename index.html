@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Record | Matte Black Mobile App</title>
+  <meta name="description" content="Matte Black Minimalist Mobile Transaction Recording & Tracking App">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='28' fill='%23ffffff'/><text x='50' y='70' font-size='64' font-weight='900' font-family='sans-serif' text-anchor='middle' fill='%23000000'>₹</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="app-container">
+    
+    <!-- Mobile App Header -->
+    <header class="app-header">
+      <div class="brand-info">
+        <div class="brand-icon">₹</div>
+        <div>
+          <h1 class="brand-title">Record Vault</h1>
+          <p class="brand-subtitle" id="header-subtitle">August 2026</p>
+        </div>
+      </div>
+      <div class="header-status-badge">
+        <span class="status-dot"></span>
+        <span>Auto Sync</span>
+      </div>
+    </header>
+
+    <!-- Auto Month & Date Engine Card -->
+    <div class="date-engine-card">
+      <div class="date-card-top">
+        <div class="date-label-group">
+          <span class="date-main-text" id="display-date-main">Aug 29, 2026</span>
+          <span class="date-sub-text" id="days-left-count">2 days remaining in August</span>
+        </div>
+        <div class="month-select-pill">
+          <label for="month-select-dropdown" class="pill-title">FILTER MONTH</label>
+          <select id="month-select-dropdown" class="month-pill-dropdown" onchange="handleMonthChange(this.value)">
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+        </div>
+      </div>
+      <div class="date-auto-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Month & Month End Date fetched automatically</span>
+      </div>
+    </div>
+
+    <!-- Segmented Tab Bar -->
+    <div class="view-tabs">
+      <button type="button" class="tab-btn active" data-tab="add" onclick="switchTab('add')">
+        ➕ Add Entry
+      </button>
+      <button type="button" class="tab-btn" data-tab="view" onclick="switchTab('view')">
+        📊 View Feed
+      </button>
+    </div>
+
+    <!-- TAB 1: ADD TRANSACTION SECTION -->
+    <main id="section-add" class="section-content active">
+      <form id="add-transaction-form" autocomplete="off">
+        
+        <!-- Amount Input -->
+        <div class="form-group">
+          <label for="input-amount" class="form-label">Transaction Amount</label>
+          <div class="input-wrapper">
+            <span class="currency-prefix">₹</span>
+            <input 
+              type="number" 
+              id="input-amount" 
+              class="input-field amount-input" 
+              placeholder="0.00" 
+              step="any"
+              required 
+              inputmode="decimal"
+            />
+          </div>
+          <!-- Quick Amount Chips -->
+          <div class="quick-chips">
+            <button type="button" class="chip-btn" onclick="setQuickAmount(100)">+ ₹100</button>
+            <button type="button" class="chip-btn" onclick="setQuickAmount(500)">+ ₹500</button>
+            <button type="button" class="chip-btn" onclick="setQuickAmount(1000)">+ ₹1000</button>
+            <button type="button" class="chip-btn" onclick="setQuickAmount(2000)">+ ₹2000</button>
+          </div>
+        </div>
+
+        <!-- Purpose Detail Input -->
+        <div class="form-group">
+          <label for="input-purpose" class="form-label">Purpose / Detail</label>
+          <input 
+            type="text" 
+            id="input-purpose" 
+            class="input-field" 
+            placeholder="e.g. Mess fees, Milk for Dalia, Amazon..." 
+            required 
+          />
+        </div>
+
+        <!-- Separate Tag / Area Selection -->
+        <div class="form-group">
+          <label class="form-label">Select Area / Tag</label>
+          <input type="hidden" id="input-tag" value="Groceries" />
+          <div class="quick-chips tag-chips" id="tag-chips-container">
+            <button type="button" class="chip-btn tag-chip active" data-tag="Groceries" onclick="selectTag('Groceries', this)">🛒 Groceries</button>
+            <button type="button" class="chip-btn tag-chip" data-tag="Food" onclick="selectTag('Food', this)">🍔 Food</button>
+            <button type="button" class="chip-btn tag-chip" data-tag="Bills" onclick="selectTag('Bills', this)">🏠 Bills</button>
+            <button type="button" class="chip-btn tag-chip" data-tag="Shopping" onclick="selectTag('Shopping', this)">🛍️ Shopping</button>
+            <button type="button" class="chip-btn tag-chip" data-tag="Travel" onclick="selectTag('Travel', this)">🚗 Travel</button>
+            <button type="button" class="chip-btn tag-chip" data-tag="Entertainment" onclick="selectTag('Entertainment', this)">🍿 Movies</button>
+            <button type="button" class="chip-btn tag-chip" data-tag="Other" onclick="selectTag('Other', this)">📦 Other</button>
+          </div>
+        </div>
+
+        <!-- Readonly Auto Date Context Banner -->
+        <div class="readonly-info-box">
+          <div class="info-item">
+            <span class="lbl">Auto Timestamp</span>
+            <span class="val" id="form-auto-date">Loading...</span>
+          </div>
+          <div class="info-item" style="text-align: right;">
+            <span class="lbl">Month End Target</span>
+            <span class="val" id="form-auto-monthend">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btn-add-submit" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Transaction
+        </button>
+
+      </form>
+    </main>
+
+    <!-- TAB 2: VIEW TRANSACTIONS SECTION -->
+    <section id="section-view" class="section-content">
+      
+      <!-- Analytics Summary Card -->
+      <div class="summary-card">
+        <div class="stat-box full-width">
+          <span class="stat-title">Total Monthly Outflow</span>
+          <span class="stat-number" id="stat-total-amount">₹0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-title">Transactions</span>
+          <span class="stat-number" id="stat-count">0</span>
+          <span class="stat-sub">This month</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-title">Avg per Tx</span>
+          <span class="stat-number" id="stat-avg">₹0</span>
+          <span class="stat-sub">Estimated</span>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <select class="month-select" id="tag-filter-select" onchange="renderTransactionList()">
+            <option value="all">All Tags</option>
+            <option value="Groceries">🛒 Groceries</option>
+            <option value="Food">🍔 Food</option>
+            <option value="Bills">🏠 Bills</option>
+            <option value="Shopping">🛍️ Shopping</option>
+            <option value="Travel">🚗 Travel</option>
+            <option value="Entertainment">🍿 Movies</option>
+            <option value="Other">📦 Other</option>
+          </select>
+        </div>
+        <button type="button" class="btn-pdf-export" onclick="downloadMonthlyPDF()" title="Download Monthly Statement PDF">
+          📄 Export PDF
+        </button>
+      </div>
+
+      <!-- Feed Container -->
+      <div class="transaction-feed" id="transaction-feed">
+        <!-- Rendered via JS -->
+      </div>
+
+    </section>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="add" onclick="switchTab('add')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        <span>Add</span>
+      </button>
+      <button class="nav-item" data-tab="view" onclick="switchTab('view')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"></path>
+        </svg>
+        <span>View</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
