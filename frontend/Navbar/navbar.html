@@ -1,0 +1,242 @@
+<!-- Navbar/navbar.html -->
+<!-- Injected into every page via: fetch('../Navbar/navbar.html').then(...) -->
+
+<header
+  id="app-navbar"
+  class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md
+         dark:border-slate-800 dark:bg-slate-900/80"
+>
+  <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+
+    <!-- ── Brand ───────────────────────────────────────────── -->
+    <a
+      href="../Home/home.html"
+      class="flex items-center gap-2 rounded-lg px-1 py-1
+             focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+    >
+      <span
+        class="flex h-8 w-8 items-center justify-center rounded-lg
+               bg-indigo-600 text-sm font-bold text-white shadow-sm"
+      >
+        ₹
+      </span>
+      <span class="text-base font-semibold tracking-tight text-slate-900 dark:text-white">
+        Record Vault
+      </span>
+    </a>
+
+    <!-- ── Desktop links ───────────────────────────────────── -->
+    <ul class="hidden items-center gap-1 md:flex">
+      <li>
+        <a
+          data-nav-link="home"
+          href="../Home/home.html"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition
+                 hover:bg-slate-100 hover:text-slate-900
+                 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        >
+          Home
+        </a>
+      </li>
+      <li>
+        <a
+          data-nav-link="transactions"
+          href="../Transaction/transactions.html"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition
+                 hover:bg-slate-100 hover:text-slate-900
+                 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        >
+          Transactions
+        </a>
+      </li>
+    </ul>
+
+    <!-- ── Right-side controls ─────────────────────────────── -->
+    <div class="flex items-center gap-2">
+
+      <!-- Theme toggle -->
+      <button
+        id="theme-toggle"
+        type="button"
+        aria-label="Toggle dark mode"
+        class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition
+               hover:bg-slate-100 hover:text-slate-900
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+               dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+      >
+        <!-- Sun (shown in dark mode) -->
+        <svg id="theme-icon-sun" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <!-- Moon (shown in light mode) -->
+        <svg id="theme-icon-moon" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+
+      <!-- Auth area (desktop) -->
+      <div id="nav-auth-desktop" class="hidden items-center gap-2 md:flex">
+        <!-- Single Unified Auth Button -->
+        <a
+          id="nav-auth-btn"
+          href="../Auth/login.html"
+          class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm
+                 transition-all duration-150 hover:bg-indigo-500 focus:outline-none focus-visible:ring-2
+                 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 active:scale-95
+                 dark:focus-visible:ring-offset-slate-900"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+          <span>Login / Register</span>
+        </a>
+      </div>
+
+      <!-- Hamburger (mobile) -->
+      <button
+        id="nav-hamburger"
+        type="button"
+        aria-label="Open menu"
+        aria-expanded="false"
+        class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition
+               hover:bg-slate-100
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+               md:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Mobile menu ───────────────────────────────────────── -->
+  <div
+    id="nav-mobile-menu"
+    class="hidden border-t border-slate-200 bg-white px-4 pb-4 pt-2
+           md:hidden dark:border-slate-800 dark:bg-slate-900"
+  >
+    <ul class="flex flex-col gap-1">
+      <li>
+        <a
+          data-nav-link="home"
+          href="../Home/home.html"
+          class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700
+                 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Home
+        </a>
+      </li>
+      <li>
+        <a
+          data-nav-link="transactions"
+          href="../Transaction/transactions.html"
+          class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700
+                 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Transactions
+        </a>
+      </li>
+    </ul>
+
+    <div id="nav-auth-mobile" class="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+      <a
+        id="nav-auth-btn-mobile"
+        href="../Auth/login.html"
+        class="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm
+               hover:bg-indigo-500 active:scale-[0.99]"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+        <span>Login / Register</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ── Navbar behaviour ────────────────────────────────────── -->
+<script>
+(function () {
+  /* ---------- THEME ---------- */
+  const root = document.documentElement;
+  const sunIcon = document.getElementById('theme-icon-sun');
+  const moonIcon = document.getElementById('theme-icon-moon');
+  const toggleBtn = document.getElementById('theme-toggle');
+
+  function applyTheme(theme) {
+    root.classList.toggle('dark', theme === 'dark');
+    sunIcon.classList.toggle('hidden', theme !== 'dark');
+    moonIcon.classList.toggle('hidden', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }
+
+  const stored = localStorage.getItem('theme');
+  const initial = stored
+    ? stored
+    : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(initial);
+
+  toggleBtn.addEventListener('click', () => {
+    applyTheme(root.classList.contains('dark') ? 'light' : 'dark');
+  });
+
+  /* ---------- ACTIVE LINK ---------- */
+  const currentPage = document.body.dataset.page || '';
+  document.querySelectorAll('[data-nav-link]').forEach(link => {
+    if (link.dataset.navLink === currentPage) {
+      link.classList.add(
+        'bg-indigo-50', 'text-indigo-700',
+        'dark:bg-indigo-500/10', 'dark:text-indigo-300'
+      );
+    }
+  });
+
+  /* ---------- MOBILE MENU ---------- */
+  const hamburger = document.getElementById('nav-hamburger');
+  const mobileMenu = document.getElementById('nav-mobile-menu');
+
+  hamburger.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('hidden') === false;
+    hamburger.setAttribute('aria-expanded', String(open));
+  });
+
+  /* ---------- AUTH STATE ---------- */
+  const auth = JSON.parse(localStorage.getItem('auth') || 'null');
+  if (auth) {
+    // Swap desktop auth area → show user + logout
+    const desktopAuth = document.getElementById('nav-auth-desktop');
+    desktopAuth.innerHTML = `
+      <span class="text-sm font-medium text-slate-700 dark:text-slate-200">
+        Hi, ${auth.name || 'User'}
+      </span>
+      <button id="nav-logout"
+        class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600
+               hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+        Log out
+      </button>`;
+
+    const mobileAuth = document.getElementById('nav-auth-mobile');
+    mobileAuth.innerHTML = `
+      <span class="px-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+        Hi, ${auth.name || 'User'}
+      </span>
+      <button id="nav-logout-mobile"
+        class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700
+               hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+        Log out
+      </button>`;
+
+    const logout = () => {
+      localStorage.removeItem('auth');
+      window.location.href = '../Auth/login.html';
+    };
+    document.getElementById('nav-logout')?.addEventListener('click', logout);
+    document.getElementById('nav-logout-mobile')?.addEventListener('click', logout);
+  }
+})();
+</script>

@@ -1,0 +1,363 @@
+<!-- Home/home.html -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record Vault — Track Every Rupee</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+
+  <script>
+    (function () {
+      const stored = localStorage.getItem('theme');
+      const dark = stored
+        ? stored === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+</head>
+
+<body
+  data-page="home"
+  class="min-h-screen bg-white text-slate-900 antialiased
+         dark:bg-slate-950 dark:text-slate-100"
+>
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <div id="navbar"></div>
+
+  <!-- ── Hero ───────────────────────────────────────────── -->
+  <section class="relative overflow-hidden">
+    <!-- Background glow -->
+    <div aria-hidden="true"
+         class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-24 left-1/2 h-72 w-[40rem] -translate-x-1/2 rounded-full
+                  bg-indigo-200/40 blur-3xl dark:bg-indigo-500/10"></div>
+      <div class="absolute bottom-0 right-0 h-64 w-64 rounded-full
+                  bg-emerald-200/30 blur-3xl dark:bg-emerald-500/10"></div>
+    </div>
+
+    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12
+                px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-28">
+
+      <!-- Copy -->
+      <div class="text-center lg:text-left">
+        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200
+                     bg-white/70 px-3 py-1 text-xs font-medium text-slate-600 backdrop-blur
+                     dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          Auto-sync · Private · Free
+        </span>
+
+        <h1 class="mt-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          Track every rupee,
+          <span class="bg-gradient-to-r from-indigo-600 to-emerald-500 bg-clip-text text-transparent">
+            effortlessly.
+          </span>
+        </h1>
+
+        <p class="mx-auto mt-5 max-w-xl text-base text-slate-600 sm:text-lg lg:mx-0
+                  dark:text-slate-400">
+          Record Vault is a no-fuss personal transaction manager. Log income and
+          expenses in seconds, see where your money goes, and hit your month-end
+          targets — without the spreadsheet headache.
+        </p>
+
+        <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+          <a href="../Transaction/transactions.html"
+             class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600
+                    px-6 py-3 text-sm font-semibold text-white shadow-sm transition
+                    hover:bg-indigo-500 focus:outline-none focus-visible:ring-2
+                    focus-visible:ring-indigo-500 focus-visible:ring-offset-2
+                    sm:w-auto dark:focus-visible:ring-offset-slate-950">
+            Add your first transaction
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </a>
+          <a href="../Auth/register.html"
+             class="inline-flex w-full items-center justify-center gap-2 rounded-xl
+                    border border-slate-300 bg-white px-6 py-3 text-sm font-semibold
+                    text-slate-700 transition hover:bg-slate-50
+                    sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200
+                    dark:hover:bg-slate-800">
+            Create an account
+          </a>
+        </div>
+
+        <p class="mt-4 text-xs text-slate-500 dark:text-slate-500">
+          No credit card. No setup. Just open and start.
+        </p>
+      </div>
+
+      <!-- Preview mock -->
+      <div class="relative">
+        <div class="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl
+                    shadow-indigo-500/5 dark:border-slate-800 dark:bg-slate-900">
+          <!-- Fake window bar -->
+          <div class="mb-4 flex items-center gap-1.5">
+            <span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+          </div>
+
+          <!-- Month header -->
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3
+                      dark:bg-slate-800/60">
+            <div>
+              <p class="text-xs text-slate-500 dark:text-slate-400">October 2026</p>
+              <p class="text-base font-semibold">₹12,480</p>
+            </div>
+            <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-medium
+                         text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+              On track
+            </span>
+          </div>
+
+          <!-- Mini bars -->
+          <div class="mt-4 flex h-24 items-end gap-2">
+            <div class="flex-1 rounded-t-md bg-indigo-100 dark:bg-indigo-500/20" style="height: 30%"></div>
+            <div class="flex-1 rounded-t-md bg-indigo-100 dark:bg-indigo-500/20" style="height: 55%"></div>
+            <div class="flex-1 rounded-t-md bg-indigo-500" style="height: 80%"></div>
+            <div class="flex-1 rounded-t-md bg-indigo-100 dark:bg-indigo-500/20" style="height: 45%"></div>
+            <div class="flex-1 rounded-t-md bg-indigo-100 dark:bg-indigo-500/20" style="height: 65%"></div>
+            <div class="flex-1 rounded-t-md bg-indigo-500" style="height: 90%"></div>
+            <div class="flex-1 rounded-t-md bg-indigo-100 dark:bg-indigo-500/20" style="height: 40%"></div>
+          </div>
+
+          <!-- Mini tx list -->
+          <div class="mt-4 space-y-2">
+            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2
+                        dark:bg-slate-800/60">
+              <div class="flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100
+                             text-xs dark:bg-rose-500/10">🍔</span>
+                <span class="text-xs font-medium">Lunch</span>
+              </div>
+              <span class="text-xs font-semibold text-rose-600 dark:text-rose-400">−₹240</span>
+            </div>
+            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2
+                        dark:bg-slate-800/60">
+              <div class="flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100
+                             text-xs dark:bg-emerald-500/10">💼</span>
+                <span class="text-xs font-medium">Salary</span>
+              </div>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">+₹15,000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating accent card -->
+        <div class="absolute -bottom-4 -left-4 hidden rounded-xl border border-slate-200
+                    bg-white px-4 py-3 shadow-lg sm:block
+                    dark:border-slate-800 dark:bg-slate-900">
+          <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            Auto-synced
+          </p>
+          <p class="text-sm font-semibold">16 Oct · 12:30 PM</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Feature strip ──────────────────────────────────── -->
+  <section class="border-y border-slate-100 bg-slate-50/60 dark:border-slate-900 dark:bg-slate-900/40">
+    <div class="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-8 sm:px-6
+                md:grid-cols-4 lg:px-8">
+      <div class="text-center md:text-left">
+        <p class="text-xl font-bold sm:text-2xl">₹0</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Free forever</p>
+      </div>
+      <div class="text-center md:text-left">
+        <p class="text-xl font-bold sm:text-2xl">Auto</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Timestamp & sync</p>
+      </div>
+      <div class="text-center md:text-left">
+        <p class="text-xl font-bold sm:text-2xl">Private</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Data stays yours</p>
+      </div>
+      <div class="text-center md:text-left">
+        <p class="text-xl font-bold sm:text-2xl">Fast</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Log in seconds</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ───────────────────────────────────────── -->
+  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+        Everything you need. Nothing you don't.
+      </h2>
+      <p class="mt-4 text-base text-slate-600 dark:text-slate-400">
+        Built for people who want to track money without turning it into a project.
+      </p>
+    </div>
+
+    <div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- Feature 1 -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl
+                    bg-indigo-50 text-indigo-600
+                    dark:bg-indigo-500/10 dark:text-indigo-400">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold">Auto timestamp</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          Every entry is stamped with the exact date and time. No manual
+          bookkeeping, no forgotten entries.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl
+                    bg-emerald-50 text-emerald-600
+                    dark:bg-emerald-500/10 dark:text-emerald-400">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold">Monthly insights</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          See your total outflow, category breakdowns, and how you're tracking
+          against your month-end target.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl
+                    bg-amber-50 text-amber-600
+                    dark:bg-amber-500/10 dark:text-amber-400">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold">Private by default</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          Your transactions are yours. No ads, no data selling, no third parties
+          peeking at your numbers.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ───────────────────────────────────── -->
+  <section class="border-t border-slate-100 bg-slate-50/60
+                  dark:border-slate-900 dark:bg-slate-900/40">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          Up and running in under a minute
+        </h2>
+      </div>
+
+      <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div class="relative text-center md:text-left">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl
+                      bg-indigo-600 text-base font-bold text-white md:mx-0">1</div>
+          <h3 class="mt-4 text-lg font-semibold">Sign up</h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Create a free account in seconds. No email confirmation loops.
+          </p>
+        </div>
+        <div class="relative text-center md:text-left">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl
+                      bg-indigo-600 text-base font-bold text-white md:mx-0">2</div>
+          <h3 class="mt-4 text-lg font-semibold">Log transactions</h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Add income and expenses as they happen. Everything is timestamped
+            automatically.
+          </p>
+        </div>
+        <div class="relative text-center md:text-left">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl
+                      bg-indigo-600 text-base font-bold text-white md:mx-0">3</div>
+          <h3 class="mt-4 text-lg font-semibold">Watch your money</h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Get month-over-month insight and stay on target without spreadsheets.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Final CTA ──────────────────────────────────────── -->
+  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br
+                from-indigo-600 to-indigo-800 px-6 py-12 text-center shadow-xl
+                sm:px-12 sm:py-16">
+      <div aria-hidden="true"
+           class="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full
+                  bg-white/10 blur-3xl"></div>
+      <h2 class="relative text-3xl font-bold tracking-tight text-white sm:text-4xl">
+        Start tracking today
+      </h2>
+      <p class="relative mx-auto mt-4 max-w-xl text-sm text-indigo-100 sm:text-base">
+        Free, fast, and built for people who'd rather live their life than
+        manage a spreadsheet.
+      </p>
+      <div class="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href="../Auth/register.html"
+           class="inline-flex w-full items-center justify-center rounded-xl bg-white
+                  px-6 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition
+                  hover:bg-indigo-50 sm:w-auto">
+          Create free account
+        </a>
+        <a href="../Transaction/transactions.html"
+           class="inline-flex w-full items-center justify-center rounded-xl border
+                  border-white/30 px-6 py-3 text-sm font-semibold text-white transition
+                  hover:bg-white/10 sm:w-auto">
+          Try without signing up
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <footer class="border-t border-slate-100 dark:border-slate-900">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3
+                px-4 py-8 text-sm text-slate-500 sm:flex-row sm:px-6 lg:px-8
+                dark:text-slate-400">
+      <p>© 2026 Record Vault</p>
+      <p class="text-xs">Made for personal finance, the simple way.</p>
+    </div>
+  </footer>
+
+  <!-- ── Navbar loader ──────────────────────────────────── -->
+  <script>
+    fetch('../Navbar/navbar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('navbar').innerHTML = html;
+        document.querySelectorAll('#navbar script').forEach(old => {
+          const s = document.createElement('script');
+          s.textContent = old.textContent;
+          old.replaceWith(s);
+        });
+      })
+      .catch(err => console.error('Navbar load failed:', err));
+  </script>
+</body>
+</html>

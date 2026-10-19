@@ -1,0 +1,449 @@
+<!-- Transaction/transactions.html -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record Vault — Transactions</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+
+  <script>
+    (function () {
+      const stored = localStorage.getItem('theme');
+      const dark = stored
+        ? stored === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+</head>
+
+<body
+  data-page="transactions"
+  class="min-h-screen bg-slate-50 text-slate-900 antialiased
+         dark:bg-slate-950 dark:text-slate-100"
+>
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <div id="navbar"></div>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+
+    <!-- ── Page heading + Add button ───────────────────── -->
+    <div class="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Transactions</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          October 2026 · 15 days remaining
+        </p>
+      </div>
+      <button
+        id="open-add-panel"
+        type="button"
+        class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5
+               text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2
+               dark:focus-visible:ring-offset-slate-950"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Transaction
+      </button>
+    </div>
+
+    <!-- ── Summary cards ───────────────────────────────── -->
+    <section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Outflow</p>
+        <p class="mt-2 text-xl font-bold sm:text-2xl">₹0</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Transactions</p>
+        <p class="mt-2 text-xl font-bold sm:text-2xl">0</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Avg / Tx</p>
+        <p class="mt-2 text-xl font-bold sm:text-2xl">₹0</p>
+      </div>
+    </section>
+
+    <!-- ── Filters ─────────────────────────────────────── -->
+    <section class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <!-- Search -->
+      <div class="relative flex-1">
+        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3
+                     text-slate-400">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input
+          type="search"
+          placeholder="Search transactions…"
+          class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm
+                 text-slate-900 placeholder-slate-400 shadow-sm transition
+                 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
+                 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100
+                 dark:placeholder-slate-500"
+        />
+      </div>
+
+      <!-- Type filter -->
+      <div class="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm
+                  dark:border-slate-800 dark:bg-slate-900">
+        <button class="rounded-md bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700
+                       dark:bg-indigo-500/10 dark:text-indigo-300">
+          All
+        </button>
+        <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600
+                       hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+          Income
+        </button>
+        <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600
+                       hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+          Expense
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Transaction list ────────────────────────────── -->
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm
+                    dark:border-slate-800 dark:bg-slate-900">
+
+      <!-- Empty state -->
+      <div id="empty-state"
+           class="flex flex-col items-center justify-center px-6 py-14 text-center sm:py-20">
+        <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl
+                    bg-slate-100 text-2xl dark:bg-slate-800">
+          💸
+        </div>
+        <p class="text-base font-medium sm:text-lg">No transactions yet</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Start by adding your first transaction for October.
+        </p>
+        <button
+          type="button"
+          data-open-add
+          class="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2
+                 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add Transaction
+        </button>
+      </div>
+
+      <!-- List (hidden until there are items) -->
+      <ul id="tx-list" class="hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <!-- Example row — uncomment/duplicate when wiring data:
+        <li class="flex items-center gap-4 px-5 py-4 sm:px-6">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
+                       bg-rose-50 text-base dark:bg-rose-500/10">🍔</span>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium">Lunch at cafe</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Food · 16 Oct · 12:30 PM</p>
+          </div>
+          <p class="text-sm font-semibold text-rose-600 dark:text-rose-400">−₹240</p>
+        </li>
+        -->
+      </ul>
+    </section>
+
+    <p class="mt-8 text-center text-xs text-slate-400 dark:text-slate-600">
+      Record Vault · Personal transaction manager
+    </p>
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════
+       ADD TRANSACTION PANEL (slide-up on mobile, modal on desktop)
+       ══════════════════════════════════════════════════════ -->
+
+  <!-- Backdrop -->
+  <div id="add-backdrop"
+       class="fixed inset-0 z-40 hidden bg-slate-900/50 backdrop-blur-sm"></div>
+
+  <!-- Panel -->
+  <aside
+    id="add-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="add-panel-title"
+    class="fixed inset-x-0 bottom-0 z-50 hidden max-h-[90vh] overflow-y-auto rounded-t-2xl
+           border-t border-slate-200 bg-white shadow-2xl
+           sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-md
+           sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border
+           dark:border-slate-800 dark:bg-slate-900"
+  >
+    <!-- Drag handle (mobile only) -->
+    <div class="mx-auto mt-3 h-1 w-10 rounded-full bg-slate-200 sm:hidden dark:bg-slate-700"></div>
+
+    <!-- Header -->
+    <div class="flex items-start justify-between border-b border-slate-100 px-5 py-4
+                sm:px-6 dark:border-slate-800">
+      <div>
+        <h2 id="add-panel-title" class="text-lg font-semibold">Add Transaction</h2>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          Timestamp will be set automatically
+        </p>
+      </div>
+      <button
+        id="close-add-panel"
+        type="button"
+        aria-label="Close"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition
+               hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form id="add-form" class="space-y-5 px-5 py-5 sm:px-6">
+
+      <!-- Type toggle -->
+      <div>
+        <label class="mb-2 block text-xs font-medium text-slate-600 dark:text-slate-400">
+          Type
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="cursor-pointer">
+            <input type="radio" name="type" value="expense" class="peer sr-only" checked />
+            <div class="flex items-center justify-center gap-2 rounded-lg border border-slate-200
+                        bg-white py-2.5 text-sm font-medium text-slate-600 transition
+                        peer-checked:border-rose-500 peer-checked:bg-rose-50 peer-checked:text-rose-700
+                        dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300
+                        dark:peer-checked:border-rose-500 dark:peer-checked:bg-rose-500/10
+                        dark:peer-checked:text-rose-300">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+              </svg>
+              Expense
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="type" value="income" class="peer sr-only" />
+            <div class="flex items-center justify-center gap-2 rounded-lg border border-slate-200
+                        bg-white py-2.5 text-sm font-medium text-slate-600 transition
+                        peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700
+                        dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300
+                        dark:peer-checked:border-emerald-500 dark:peer-checked:bg-emerald-500/10
+                        dark:peer-checked:text-emerald-300">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+              </svg>
+              Income
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div>
+        <label for="amount" class="mb-2 block text-xs font-medium text-slate-600 dark:text-slate-400">
+          Amount
+        </label>
+        <div class="relative">
+          <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3
+                       text-sm font-medium text-slate-500 dark:text-slate-400">₹</span>
+          <input
+            id="amount"
+            name="amount"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="0.01"
+            required
+            placeholder="0.00"
+            class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-8 pr-3 text-sm
+                   text-slate-900 placeholder-slate-400 shadow-sm transition
+                   focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
+                   dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
+                   dark:placeholder-slate-500"
+          />
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div>
+        <label for="category" class="mb-2 block text-xs font-medium text-slate-600 dark:text-slate-400">
+          Category
+        </label>
+        <select
+          id="category"
+          name="category"
+          class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm
+                 text-slate-900 shadow-sm transition
+                 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
+                 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+        >
+          <option>Food & Dining</option>
+          <option>Transport</option>
+          <option>Shopping</option>
+          <option>Bills & Utilities</option>
+          <option>Entertainment</option>
+          <option>Health</option>
+          <option>Salary</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <!-- Note -->
+      <div>
+        <label for="note" class="mb-2 block text-xs font-medium text-slate-600 dark:text-slate-400">
+          Note <span class="text-slate-400">(optional)</span>
+        </label>
+        <input
+          id="note"
+          name="note"
+          type="text"
+          maxlength="80"
+          placeholder="e.g. Lunch with team"
+          class="w-full rounded-lg border border-slate-200 bg-white py-2.5 px-3 text-sm
+                 text-slate-900 placeholder-slate-400 shadow-sm transition
+                 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
+                 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
+                 dark:placeholder-slate-500"
+        />
+      </div>
+
+      <!-- Auto timestamp preview -->
+      <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2.5 text-xs
+                  text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Auto timestamp · <span id="ts-preview">—</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          id="cancel-add"
+          class="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium
+                 text-slate-700 transition hover:bg-slate-50
+                 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm
+                 transition hover:bg-indigo-500
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+        >
+          Save Transaction
+        </button>
+      </div>
+    </form>
+  </aside>
+
+  <!-- ── Navbar loader ───────────────────────────────────── -->
+  <script>
+    fetch('../Navbar/navbar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('navbar').innerHTML = html;
+        document.querySelectorAll('#navbar script').forEach(old => {
+          const s = document.createElement('script');
+          s.textContent = old.textContent;
+          old.replaceWith(s);
+        });
+      })
+      .catch(err => console.error('Navbar load failed:', err));
+  </script>
+
+  <!-- ── Page behaviour ──────────────────────────────────── -->
+  <script>
+  (function () {
+    const panel = document.getElementById('add-panel');
+    const backdrop = document.getElementById('add-backdrop');
+    const openBtn = document.getElementById('open-add-panel');
+    const emptyAddBtns = document.querySelectorAll('[data-open-add]');
+    const closeBtn = document.getElementById('close-add-panel');
+    const cancelBtn = document.getElementById('cancel-add');
+    const form = document.getElementById('add-form');
+    const tsPreview = document.getElementById('ts-preview');
+
+    function openPanel() {
+      panel.classList.remove('hidden');
+      backdrop.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      // Live timestamp preview
+      const now = new Date();
+      tsPreview.textContent = now.toLocaleString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      // Focus first field
+      setTimeout(() => document.getElementById('amount')?.focus(), 50);
+    }
+
+    function closePanel() {
+      panel.classList.add('hidden');
+      backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    openBtn?.addEventListener('click', openPanel);
+    emptyAddBtns.forEach(b => b.addEventListener('click', openPanel));
+    closeBtn?.addEventListener('click', closePanel);
+    cancelBtn?.addEventListener('click', closePanel);
+    backdrop?.addEventListener('click', closePanel);
+
+    // Escape to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.classList.contains('hidden')) closePanel();
+    });
+
+    // Submit stub — we'll wire real data later
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      console.log('New transaction:', Object.fromEntries(fd.entries()));
+      // TODO: persist + re-render list
+      closePanel();
+      form.reset();
+    });
+  })();
+  </script>
+
+  <!-- ── Navbar loader ──────────────────────────────────── -->
+  <script>
+    fetch('../Navbar/navbar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('navbar').innerHTML = html;
+        document.querySelectorAll('#navbar script').forEach(old => {
+          const s = document.createElement('script');
+          s.textContent = old.textContent;
+          old.replaceWith(s);
+        });
+      })
+      .catch(err => console.error('Navbar load failed:', err));
+  </script>
+</body>
+</html>
