@@ -63,17 +63,17 @@
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
                   dark:border-slate-800 dark:bg-slate-900">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Outflow</p>
-        <p class="mt-2 text-xl font-bold sm:text-2xl">₹0</p>
+        <p id="stat-total-outflow" class="mt-2 text-xl font-bold sm:text-2xl text-slate-900 dark:text-white">₹0</p>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
                   dark:border-slate-800 dark:bg-slate-900">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Transactions</p>
-        <p class="mt-2 text-xl font-bold sm:text-2xl">0</p>
+        <p id="stat-tx-count" class="mt-2 text-xl font-bold sm:text-2xl text-slate-900 dark:text-white">0</p>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
                   dark:border-slate-800 dark:bg-slate-900">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Avg / Tx</p>
-        <p class="mt-2 text-xl font-bold sm:text-2xl">₹0</p>
+        <p id="stat-avg-tx" class="mt-2 text-xl font-bold sm:text-2xl text-slate-900 dark:text-white">₹0</p>
       </div>
     </section>
 
@@ -90,6 +90,7 @@
           </svg>
         </span>
         <input
+          id="search-input"
           type="search"
           placeholder="Search transactions…"
           class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm
@@ -101,17 +102,17 @@
       </div>
 
       <!-- Type filter -->
-      <div class="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm
+      <div id="type-filter-group" class="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm
                   dark:border-slate-800 dark:bg-slate-900">
-        <button class="rounded-md bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700
+        <button data-type-filter="all" class="type-filter-btn rounded-md bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700
                        dark:bg-indigo-500/10 dark:text-indigo-300">
           All
         </button>
-        <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600
+        <button data-type-filter="income" class="type-filter-btn rounded-md px-3 py-1.5 text-xs font-medium text-slate-600
                        hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
           Income
         </button>
-        <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600
+        <button data-type-filter="expense" class="type-filter-btn rounded-md px-3 py-1.5 text-xs font-medium text-slate-600
                        hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
           Expense
         </button>
@@ -359,24 +360,38 @@
     </form>
   </aside>
 
-  <!-- ── Navbar loader ───────────────────────────────────── -->
-  <script>
-    fetch('../Navbar/navbar.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('navbar').innerHTML = html;
-        document.querySelectorAll('#navbar script').forEach(old => {
-          const s = document.createElement('script');
-          s.textContent = old.textContent;
-          old.replaceWith(s);
-        });
-      })
-      .catch(err => console.error('Navbar load failed:', err));
-  </script>
+  <!-- ── Toast notification container ─────────────────────── -->
+  <div id="tx-toast" class="fixed bottom-5 right-5 z-50 hidden rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-xl dark:bg-slate-800 dark:border dark:border-slate-700 transition-opacity">
+    <span id="tx-toast-msg">Notification</span>
+  </div>
 
-  <!-- ── Page behaviour ──────────────────────────────────── -->
+  <!-- ── Shared Navbar loader & Shared Store ────────────── -->
+  <script src="../Navbar/navbar.js"></script>
+  <script src="../Navbar/store.js"></script>
+
+  <!-- ── Transactions Page Engine ─────────────────────────── -->
   <script>
   (function () {
+    // API Configuration
+    const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+      ? 'http://127.0.0.1:8000'
+      : 'https://transaction-record.onrender.com';
+
+    // Fallback dummy records if server is not yet running
+    const INITIAL_DUMMY_RECORDS = [
+      { id: "tx-1", type: "expense", amount: 240.0, category: "Food & Dining", note: "Lunch at cafe", timestamp: "16 Oct 2026, 12:30 PM", created_at: "2026-10-16T12:30:00" },
+      { id: "tx-2", type: "income", amount: 45000.0, category: "Salary", note: "Monthly salary credit", timestamp: "01 Oct 2026, 09:00 AM", created_at: "2026-10-01T09:00:00" },
+      { id: "tx-3", type: "expense", amount: 1200.0, category: "Transport", note: "Fuel & Metro recharge", timestamp: "18 Oct 2026, 06:15 PM", created_at: "2026-10-18T18:15:00" },
+      { id: "tx-4", type: "expense", amount: 2500.0, category: "Shopping", note: "Groceries & household supplies", timestamp: "20 Oct 2026, 04:45 PM", created_at: "2026-10-20T16:45:00" },
+      { id: "tx-5", type: "expense", amount: 899.0, category: "Bills & Utilities", note: "Broadband internet bill", timestamp: "21 Oct 2026, 11:00 AM", created_at: "2026-10-21T11:00:00" }
+    ];
+
+    // State
+    let transactions = [];
+    let currentFilter = 'all'; // 'all' | 'income' | 'expense'
+    let searchQuery = '';
+
+    // DOM Elements
     const panel = document.getElementById('add-panel');
     const backdrop = document.getElementById('add-backdrop');
     const openBtn = document.getElementById('open-add-panel');
@@ -386,19 +401,36 @@
     const form = document.getElementById('add-form');
     const tsPreview = document.getElementById('ts-preview');
 
+    const txListEl = document.getElementById('tx-list');
+    const emptyStateEl = document.getElementById('empty-state');
+    const statTotalOutflowEl = document.getElementById('stat-total-outflow');
+    const statTxCountEl = document.getElementById('stat-tx-count');
+    const statAvgTxEl = document.getElementById('stat-avg-tx');
+    const searchInputEl = document.getElementById('search-input');
+    const filterBtns = document.querySelectorAll('.type-filter-btn');
+
+    // Toast helper
+    function showToast(msg) {
+      const toast = document.getElementById('tx-toast');
+      const toastMsg = document.getElementById('tx-toast-msg');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    // Modal Handlers
     function openPanel() {
       panel.classList.remove('hidden');
       backdrop.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
 
-      // Live timestamp preview
       const now = new Date();
       tsPreview.textContent = now.toLocaleString('en-IN', {
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
       });
 
-      // Focus first field
       setTimeout(() => document.getElementById('amount')?.focus(), 50);
     }
 
@@ -406,6 +438,7 @@
       panel.classList.add('hidden');
       backdrop.classList.add('hidden');
       document.body.style.overflow = '';
+      form.reset();
     }
 
     openBtn?.addEventListener('click', openPanel);
@@ -414,36 +447,260 @@
     cancelBtn?.addEventListener('click', closePanel);
     backdrop?.addEventListener('click', closePanel);
 
-    // Escape to close
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !panel.classList.contains('hidden')) closePanel();
     });
 
-    // Submit stub — we'll wire real data later
-    form?.addEventListener('submit', (e) => {
+    // Category styling & icons
+    function getCategoryMeta(category, type) {
+      const map = {
+        'Food & Dining': { icon: '🍔', bg: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' },
+        'Transport': { icon: '🚗', bg: 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400' },
+        'Shopping': { icon: '🛍️', bg: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' },
+        'Bills & Utilities': { icon: '⚡', bg: 'bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400' },
+        'Entertainment': { icon: '🎬', bg: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' },
+        'Health': { icon: '🩺', bg: 'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400' },
+        'Salary': { icon: '💰', bg: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' },
+        'Other': { icon: '📦', bg: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }
+      };
+      return map[category] || (type === 'income'
+        ? { icon: '💰', bg: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' }
+        : { icon: '💸', bg: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' });
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      return '₹' + Number(amount || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Render Transactions & Summary Stats
+    function render() {
+      // 1. Calculate overall summary statistics
+      const expenseList = transactions.filter(t => t.type === 'expense');
+      const totalOutflow = expenseList.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const totalCount = transactions.length;
+      const avgTx = expenseList.length > 0 ? (totalOutflow / expenseList.length) : 0;
+
+      if (statTotalOutflowEl) statTotalOutflowEl.textContent = formatCurrency(totalOutflow);
+      if (statTxCountEl) statTxCountEl.textContent = String(totalCount);
+      if (statAvgTxEl) statAvgTxEl.textContent = formatCurrency(avgTx);
+
+      // 2. Filter transactions for list display
+      let list = [...transactions];
+      if (currentFilter !== 'all') {
+        list = list.filter(t => t.type === currentFilter);
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(t =>
+          (t.note && t.note.toLowerCase().includes(q)) ||
+          (t.category && t.category.toLowerCase().includes(q)) ||
+          String(t.amount).includes(q)
+        );
+      }
+
+      // 3. Update DOM List
+      if (list.length === 0) {
+        txListEl.classList.add('hidden');
+        emptyStateEl.classList.remove('hidden');
+        txListEl.innerHTML = '';
+        return;
+      }
+
+      emptyStateEl.classList.add('hidden');
+      txListEl.classList.remove('hidden');
+
+      txListEl.innerHTML = list.map(t => {
+        const isIncome = t.type === 'income';
+        const meta = getCategoryMeta(t.category, t.type);
+        const sign = isIncome ? '+' : '−';
+        const colorClass = isIncome
+          ? 'text-emerald-600 dark:text-emerald-400'
+          : 'text-rose-600 dark:text-rose-400';
+        const displayTitle = t.note ? t.note : t.category;
+        const displaySubtitle = `${t.category} · ${t.timestamp || t.date || 'Recent'}`;
+
+        return `
+          <li class="group flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-slate-50/70 sm:px-6 dark:hover:bg-slate-800/40">
+            <div class="flex items-center gap-4 min-w-0">
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-xl shadow-sm ${meta.bg}">
+                ${meta.icon}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(displayTitle)}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(displaySubtitle)}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <p class="text-base font-bold whitespace-nowrap ${colorClass}">
+                ${sign}${formatCurrency(t.amount)}
+              </p>
+              <button
+                type="button"
+                data-del-id="${t.id}"
+                title="Delete transaction"
+                class="btn-delete-tx flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 opacity-60 transition hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+              >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </li>
+        `;
+      }).join('');
+
+      // Wire delete handlers
+      document.querySelectorAll('.btn-delete-tx').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-del-id');
+          if (id) deleteTransaction(id);
+        });
+      });
+
+      // Synchronize with shared cross-page store
+      if (window.RVStore && Array.isArray(transactions)) {
+        window.RVStore.saveTransactions(transactions);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // API: Fetch Transactions
+    async function fetchTransactions() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/tran/fetch`);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+        if (data && Array.isArray(data.data)) {
+          transactions = data.data;
+          render();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend server not reachable at ' + API_BASE_URL + ', using local fallback records:', err);
+      }
+
+      // Fallback if server is not yet running
+      if (!transactions.length) {
+        transactions = [...INITIAL_DUMMY_RECORDS];
+      }
+      render();
+    }
+
+    // API: Add Transaction
+    async function addTransaction(payload) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/tran/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          showToast('Transaction recorded successfully!');
+          await fetchTransactions();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend add failed, adding locally:', err);
+      }
+
+      // Offline / Local fallback
+      const now = new Date();
+      const localRecord = {
+        id: `tx-${Date.now()}`,
+        type: payload.type,
+        amount: Number(payload.amount),
+        category: payload.category,
+        note: payload.note || '',
+        date: now.toISOString().split('T')[0],
+        timestamp: now.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        created_at: now.toISOString()
+      };
+      transactions.unshift(localRecord);
+      render();
+      showToast('Transaction saved (Local mode)!');
+    }
+
+    // API: Delete Transaction
+    async function deleteTransaction(txId) {
+      if (!confirm('Are you sure you want to delete this transaction?')) return;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/tran/delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: txId })
+        });
+        if (res.ok) {
+          showToast('Transaction deleted');
+          await fetchTransactions();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend delete failed, removing locally:', err);
+      }
+
+      transactions = transactions.filter(t => t.id !== txId);
+      render();
+      showToast('Transaction deleted (Local)');
+    }
+
+    // Form Submit Event
+    form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-      console.log('New transaction:', Object.fromEntries(fd.entries()));
-      // TODO: persist + re-render list
-      closePanel();
-      form.reset();
-    });
-  })();
-  </script>
+      const type = fd.get('type') || 'expense';
+      const amount = parseFloat(fd.get('amount'));
+      const category = fd.get('category') || 'Other';
+      const note = fd.get('note') || '';
 
-  <!-- ── Navbar loader ──────────────────────────────────── -->
-  <script>
-    fetch('../Navbar/navbar.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('navbar').innerHTML = html;
-        document.querySelectorAll('#navbar script').forEach(old => {
-          const s = document.createElement('script');
-          s.textContent = old.textContent;
-          old.replaceWith(s);
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid positive transaction amount.');
+        return;
+      }
+
+      const payload = { type, amount, category, note };
+      closePanel();
+      await addTransaction(payload);
+    });
+
+    // Filter type buttons (All / Income / Expense)
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selected = btn.getAttribute('data-type-filter');
+        currentFilter = selected;
+
+        filterBtns.forEach(b => {
+          const isActive = b === btn;
+          b.className = isActive
+            ? 'type-filter-btn rounded-md bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
+            : 'type-filter-btn rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800';
         });
-      })
-      .catch(err => console.error('Navbar load failed:', err));
+
+        render();
+      });
+    });
+
+    // Search input
+    searchInputEl?.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    // Initial load
+    fetchTransactions();
+  })();
   </script>
 </body>
 </html>

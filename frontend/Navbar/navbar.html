@@ -49,6 +49,17 @@
           Transactions
         </a>
       </li>
+      <li>
+        <a
+          data-nav-link="profile"
+          href="../Profile/profile.html"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition
+                 hover:bg-slate-100 hover:text-slate-900
+                 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        >
+          Profile
+        </a>
+      </li>
     </ul>
 
     <!-- ── Right-side controls ─────────────────────────────── -->
@@ -141,6 +152,16 @@
           Transactions
         </a>
       </li>
+      <li>
+        <a
+          data-nav-link="profile"
+          href="../Profile/profile.html"
+          class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700
+                 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Profile
+        </a>
+      </li>
     </ul>
 
     <div id="nav-auth-mobile" class="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-3 dark:border-slate-800">
@@ -158,85 +179,4 @@
     </div>
   </div>
 </header>
-
-<!-- ── Navbar behaviour ────────────────────────────────────── -->
-<script>
-(function () {
-  /* ---------- THEME ---------- */
-  const root = document.documentElement;
-  const sunIcon = document.getElementById('theme-icon-sun');
-  const moonIcon = document.getElementById('theme-icon-moon');
-  const toggleBtn = document.getElementById('theme-toggle');
-
-  function applyTheme(theme) {
-    root.classList.toggle('dark', theme === 'dark');
-    sunIcon.classList.toggle('hidden', theme !== 'dark');
-    moonIcon.classList.toggle('hidden', theme === 'dark');
-    localStorage.setItem('theme', theme);
-  }
-
-  const stored = localStorage.getItem('theme');
-  const initial = stored
-    ? stored
-    : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  applyTheme(initial);
-
-  toggleBtn.addEventListener('click', () => {
-    applyTheme(root.classList.contains('dark') ? 'light' : 'dark');
-  });
-
-  /* ---------- ACTIVE LINK ---------- */
-  const currentPage = document.body.dataset.page || '';
-  document.querySelectorAll('[data-nav-link]').forEach(link => {
-    if (link.dataset.navLink === currentPage) {
-      link.classList.add(
-        'bg-indigo-50', 'text-indigo-700',
-        'dark:bg-indigo-500/10', 'dark:text-indigo-300'
-      );
-    }
-  });
-
-  /* ---------- MOBILE MENU ---------- */
-  const hamburger = document.getElementById('nav-hamburger');
-  const mobileMenu = document.getElementById('nav-mobile-menu');
-
-  hamburger.addEventListener('click', () => {
-    const open = mobileMenu.classList.toggle('hidden') === false;
-    hamburger.setAttribute('aria-expanded', String(open));
-  });
-
-  /* ---------- AUTH STATE ---------- */
-  const auth = JSON.parse(localStorage.getItem('auth') || 'null');
-  if (auth) {
-    // Swap desktop auth area → show user + logout
-    const desktopAuth = document.getElementById('nav-auth-desktop');
-    desktopAuth.innerHTML = `
-      <span class="text-sm font-medium text-slate-700 dark:text-slate-200">
-        Hi, ${auth.name || 'User'}
-      </span>
-      <button id="nav-logout"
-        class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600
-               hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
-        Log out
-      </button>`;
-
-    const mobileAuth = document.getElementById('nav-auth-mobile');
-    mobileAuth.innerHTML = `
-      <span class="px-3 text-sm font-medium text-slate-700 dark:text-slate-200">
-        Hi, ${auth.name || 'User'}
-      </span>
-      <button id="nav-logout-mobile"
-        class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700
-               hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-        Log out
-      </button>`;
-
-    const logout = () => {
-      localStorage.removeItem('auth');
-      window.location.href = '../Auth/login.html';
-    };
-    document.getElementById('nav-logout')?.addEventListener('click', logout);
-    document.getElementById('nav-logout-mobile')?.addEventListener('click', logout);
-  }
-})();
-</script>
+

@@ -1,0 +1,771 @@
+<!-- Profile/profile.html -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile & Financial Overview — Record Vault</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+
+  <!-- Prevent dark-mode flash -->
+  <script>
+    (function () {
+      const stored = localStorage.getItem('theme');
+      const dark = stored
+        ? stored === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+</head>
+
+<body
+  data-page="profile"
+  class="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col justify-between
+         dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200"
+>
+
+  <!-- ── Injected Navbar ──────────────────────────────────── -->
+  <div id="navbar"></div>
+
+  <!-- ── Main Profile Content ─────────────────────────────── -->
+  <main class="relative flex-1 mx-auto max-w-6xl w-full px-4 py-8 sm:px-6 lg:px-8">
+    
+    <!-- Ambient background glow matching site aesthetic -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div class="absolute -top-24 left-1/2 -translate-x-1/2 h-80 w-[42rem] rounded-full
+                  bg-indigo-200/40 blur-3xl dark:bg-indigo-600/10"></div>
+      <div class="absolute top-96 right-10 h-72 w-72 rounded-full
+                  bg-emerald-200/30 blur-3xl dark:bg-emerald-500/10"></div>
+    </div>
+
+    <!-- ── 1. Profile Header Hero Card ─────────────────────── -->
+    <section class="mb-8 rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-md
+                    sm:p-8 dark:border-slate-800/80 dark:bg-slate-900/90 dark:shadow-2xl">
+      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        
+        <!-- Avatar + Basic Info -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div class="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl
+                      bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-bold text-white shadow-lg shadow-indigo-500/25">
+            <span id="prof-avatar">PS</span>
+            <span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs border-2 border-white dark:border-slate-900">
+              ✓
+            </span>
+          </div>
+
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 id="prof-name" class="text-2xl font-bold tracking-tight sm:text-3xl">Prakhar Srivastava</h1>
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
+                <span class="h-1.5 w-1.5 rounded-full bg-indigo-600"></span>
+                Verified Member
+              </span>
+            </div>
+            
+            <p id="prof-occupation" class="mt-1 text-sm font-medium text-slate-600 dark:text-slate-300">
+              Senior Software Architect & Consultant
+            </p>
+
+            <div class="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+              <span class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span id="prof-location">Bengaluru, Karnataka, India</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span id="prof-email">prakharsrivastava019@gmail.com</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                PAN: <span id="prof-pan" class="font-mono font-semibold text-slate-700 dark:text-slate-300">ABCDE1234F</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3">
+          <button
+            id="btn-open-edit"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold
+                   text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus-visible:ring-2
+                   focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-750"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            Edit Profile
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── 2. Financial Overview Cards ─────────────────────── -->
+    <section class="mb-8">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-bold tracking-tight sm:text-xl">Financial Overview</h2>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Live fiscal calculations</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <!-- Monthly Income -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md
+                    dark:border-slate-800 dark:bg-slate-900">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Monthly Income</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+              ₹
+            </span>
+          </div>
+          <p id="stat-monthly-income" class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">₹1,50,000</p>
+          <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">Regular monthly inflow</p>
+        </div>
+
+        <!-- Current Month Expenditure -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md
+                    dark:border-slate-800 dark:bg-slate-900">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Current Month Outflow</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+              📊
+            </span>
+          </div>
+          <p id="stat-month-expenditure" class="mt-3 text-2xl font-bold text-amber-600 dark:text-amber-400">₹42,180</p>
+          <p id="stat-month-expenditure-sub" class="mt-1 text-xs text-slate-500 dark:text-slate-400">October · 28.1% of income</p>
+        </div>
+
+        <!-- Total Expenditure Till Now -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md
+                    dark:border-slate-800 dark:bg-slate-900">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Expenditure Till Now</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
+              💸
+            </span>
+          </div>
+          <p id="stat-expenditure" class="mt-3 text-2xl font-bold text-rose-600 dark:text-rose-400">₹4,82,500</p>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">26.8% of annual earnings</p>
+        </div>
+
+        <!-- Annual Income -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md
+                    dark:border-slate-800 dark:bg-slate-900">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Annual Gross Income</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+              📈
+            </span>
+          </div>
+          <p id="stat-annual-income" class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">₹18,00,000</p>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">FY 2026-27 projection</p>
+        </div>
+
+        <!-- Savings & Investments -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md
+                    dark:border-slate-800 dark:bg-slate-900">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Savings & Investments</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+              🛡️
+            </span>
+          </div>
+          <p id="stat-savings" class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">₹7,65,000</p>
+          <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">Safe emergency cushion</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 3. Bills Management: Paid vs Left ────────────────── -->
+    <section class="mb-8 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-xl font-bold tracking-tight">Bills & Subscriptions Tracker</h2>
+          <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            Track utility bills, rents, and active subscriptions with payment statuses
+          </p>
+        </div>
+
+        <!-- Filters (All / Pending / Paid) -->
+        <div id="bill-filter-tabs" class="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+          <button data-bill-filter="all" class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white">
+            All (<span id="count-all">8</span>)
+          </button>
+          <button data-bill-filter="pending" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+            Pending (<span id="count-left">3</span>)
+          </button>
+          <button data-bill-filter="paid" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+            Paid (<span id="count-paid">5</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Paid vs Left Summary Banner -->
+      <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Paid Card -->
+        <div class="flex items-center justify-between rounded-2xl border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white font-bold">✓</span>
+            <div>
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Bills Paid</p>
+              <p id="total-bills-paid-amt" class="text-xl font-bold text-emerald-700 dark:text-emerald-400">₹34,500</p>
+            </div>
+          </div>
+          <span id="badge-paid-count" class="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+            5 Settled
+          </span>
+        </div>
+
+        <!-- Pending / Left Card -->
+        <div class="flex items-center justify-between rounded-2xl border border-amber-200/70 bg-amber-50/50 p-4 dark:border-amber-500/20 dark:bg-amber-500/5">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white font-bold">!</span>
+            <div>
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Bills Left / Pending</p>
+              <p id="total-bills-left-amt" class="text-xl font-bold text-amber-700 dark:text-amber-400">₹12,850</p>
+            </div>
+          </div>
+          <span id="badge-left-count" class="rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+            3 Remaining
+          </span>
+        </div>
+      </div>
+
+      <!-- Bills List -->
+      <ul id="bills-list" class="divide-y divide-slate-100 dark:divide-slate-800">
+        <!-- Rendered dynamically by JS -->
+      </ul>
+    </section>
+
+    <!-- ── 4. Advance Tax Calculations & Reminder Schedule ─── -->
+    <section class="mb-10 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+      
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 pb-5 dark:border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">
+              ⚖️
+            </span>
+            <h2 class="text-xl font-bold tracking-tight">Advance Tax Calculations & Reminder Schedule</h2>
+          </div>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Section 208 & 211 statutory advance tax obligations for FY 2026-27 (AY 2027-28)
+          </p>
+        </div>
+
+        <span class="self-start md:self-auto rounded-full border border-indigo-200 bg-indigo-50/70 px-3 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
+          New Tax Regime (Sec 115BAC)
+        </span>
+      </div>
+
+      <!-- Advance Tax Summary Breakdown -->
+      <div class="my-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div class="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Gross Income</p>
+          <p id="tax-gross-inc" class="mt-1 font-bold text-slate-800 dark:text-slate-200">₹18,00,000</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Std Deduction</p>
+          <p id="tax-std-ded" class="mt-1 font-bold text-emerald-600 dark:text-emerald-400">−₹75,000</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Net Taxable</p>
+          <p id="tax-net-taxable" class="mt-1 font-bold text-slate-800 dark:text-slate-200">₹17,25,000</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Est. Tax + Cess</p>
+          <p id="tax-estimated-total" class="mt-1 font-bold text-slate-800 dark:text-slate-200">₹2,15,800</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
+          <p class="text-xs text-slate-500 dark:text-slate-400">TDS Credits</p>
+          <p id="tax-tds-credits" class="mt-1 font-bold text-emerald-600 dark:text-emerald-400">−₹1,00,000</p>
+        </div>
+        <div class="rounded-xl border border-indigo-200 bg-indigo-50/60 p-3.5 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+          <p class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">Net Advance Tax</p>
+          <p id="tax-net-payable" class="mt-1 font-bold text-indigo-950 dark:text-indigo-200">₹1,15,800</p>
+        </div>
+      </div>
+
+      <!-- Statutory Installment Due Dates & Reminders -->
+      <h3 class="mb-4 text-sm font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+        Quarterly Payment Deadlines & Reminders
+      </h3>
+
+      <div id="advance-tax-grid" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- Statutory Advice Box -->
+      <div class="mt-6 flex items-start gap-3 rounded-2xl bg-amber-50/70 p-4 border border-amber-200/60 text-xs text-amber-900 dark:bg-amber-500/5 dark:border-amber-500/20 dark:text-amber-300">
+        <svg class="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p>
+          <strong>Statutory Compliance Note (Section 234C):</strong> Failure to deposit each advance tax installment by the prescribed statutory due date attracts mandatory interest penalty @ 1% per month on the deficit amount. Ensure 3rd installment is remitted before <strong>15 December 2026</strong>.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ── 5. Edit Profile Modal ─────────────────────────────── -->
+  <div id="edit-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+        <h3 class="text-base font-bold">Edit Profile & Income</h3>
+        <button id="btn-close-edit" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+      </div>
+
+      <form id="edit-profile-form" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase">Full Name</label>
+          <input id="input-edit-name" name="name" type="text" required class="mt-1 w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase">Occupation</label>
+          <input id="input-edit-occupation" name="occupation" type="text" required class="mt-1 w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase">Monthly Income (₹)</label>
+          <input id="input-edit-income" name="monthly_income" type="number" required min="1000" step="100" class="mt-1 w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="btn-cancel-edit" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Cancel</button>
+          <button type="submit" class="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 shadow-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="prof-toast" class="fixed bottom-5 right-5 z-50 hidden rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-xl dark:bg-slate-800 dark:border dark:border-slate-700">
+    <span id="prof-toast-msg">Success</span>
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────── -->
+  <footer class="border-t border-slate-200/60 dark:border-slate-800/60 py-5 text-center text-xs text-slate-400 dark:text-slate-500">
+    <p>© 2026 Record Vault · Personalized financial and statutory tax intelligence</p>
+  </footer>
+
+  <!-- ── Scripts ─────────────────────────────────────────── -->
+  <!-- Reusable Shared Navbar loader & Shared Store -->
+  <script src="../Navbar/navbar.js"></script>
+  <script src="../Navbar/store.js"></script>
+
+  <!-- ── Profile Engine Script ────────────────────────────── -->
+  <script>
+  (function () {
+    const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+      ? 'http://127.0.0.1:8000'
+      : 'https://transaction-record.onrender.com';
+
+    // State
+    let profileData = null;
+    let activeBillFilter = 'all';
+
+    // Elements
+    const profAvatar = document.getElementById('prof-avatar');
+    const profName = document.getElementById('prof-name');
+    const profOccupation = document.getElementById('prof-occupation');
+    const profLocation = document.getElementById('prof-location');
+    const profEmail = document.getElementById('prof-email');
+    const profPan = document.getElementById('prof-pan');
+
+    const statMonthly = document.getElementById('stat-monthly-income');
+    const statAnnual = document.getElementById('stat-annual-income');
+    const statExpenditure = document.getElementById('stat-expenditure');
+    const statMonthExpenditure = document.getElementById('stat-month-expenditure');
+    const statMonthExpenditureSub = document.getElementById('stat-month-expenditure-sub');
+    const statSavings = document.getElementById('stat-savings');
+
+    const totalBillsPaidAmt = document.getElementById('total-bills-paid-amt');
+    const totalBillsLeftAmt = document.getElementById('total-bills-left-amt');
+    const badgePaidCount = document.getElementById('badge-paid-count');
+    const badgeLeftCount = document.getElementById('badge-left-count');
+    const countAll = document.getElementById('count-all');
+    const countLeft = document.getElementById('count-left');
+    const countPaid = document.getElementById('count-paid');
+    const billsListEl = document.getElementById('bills-list');
+
+    const advanceTaxGrid = document.getElementById('advance-tax-grid');
+    const taxGrossInc = document.getElementById('tax-gross-inc');
+    const taxStdDed = document.getElementById('tax-std-ded');
+    const taxNetTaxable = document.getElementById('tax-net-taxable');
+    const taxEstimatedTotal = document.getElementById('tax-estimated-total');
+    const taxTdsCredits = document.getElementById('tax-tds-credits');
+    const taxNetPayable = document.getElementById('tax-net-payable');
+
+    const editModal = document.getElementById('edit-modal');
+    const btnOpenEdit = document.getElementById('btn-open-edit');
+    const btnCloseEdit = document.getElementById('btn-close-edit');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
+    const editForm = document.getElementById('edit-profile-form');
+    const inputName = document.getElementById('input-edit-name');
+    const inputOccupation = document.getElementById('input-edit-occupation');
+    const inputIncome = document.getElementById('input-edit-income');
+
+    function formatCurrency(amount) {
+      return '₹' + Number(amount || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('prof-toast');
+      const toastMsg = document.getElementById('prof-toast-msg');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    // Modal Events
+    btnOpenEdit?.addEventListener('click', () => {
+      if (profileData) {
+        inputName.value = profileData.personal.name || '';
+        inputOccupation.value = profileData.personal.occupation || '';
+        inputIncome.value = profileData.finances.monthly_income || '';
+      }
+      editModal.classList.remove('hidden');
+    });
+
+    btnCloseEdit?.addEventListener('click', () => editModal.classList.add('hidden'));
+    btnCancelEdit?.addEventListener('click', () => editModal.classList.add('hidden'));
+
+    editForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const updated = {
+        name: inputName.value.trim(),
+        occupation: inputOccupation.value.trim(),
+        monthly_income: parseFloat(inputIncome.value)
+      };
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/profile/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated)
+        });
+        if (res.ok) {
+          showToast('Profile updated successfully!');
+          editModal.classList.add('hidden');
+          await fetchProfile();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend update error, updating UI locally:', err);
+      }
+
+      // Local update
+      if (profileData) {
+        profileData.personal.name = updated.name;
+        profileData.personal.occupation = updated.occupation;
+        profileData.finances.monthly_income = updated.monthly_income;
+        profileData.finances.annual_income = updated.monthly_income * 12;
+      }
+      editModal.classList.add('hidden');
+      renderProfile();
+      showToast('Profile updated locally!');
+    });
+
+    // Fetch Profile
+    async function fetchProfile() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/profile/`);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const result = await res.json();
+        if (result && result.data) {
+          profileData = result.data;
+          renderProfile();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend /profile/ unavailable, using fallback data:', err);
+      }
+
+      // Fallback data
+      profileData = {
+        personal: {
+          name: "Prakhar Srivastava",
+          email: "prakharsrivastava019@gmail.com",
+          occupation: "Senior Software Architect & Consultant",
+          location: "Bengaluru, Karnataka, India",
+          avatar_initials: "PS",
+          pan_number: "ABCDE1234F"
+        },
+        finances: {
+          annual_income: 1800000.0,
+          monthly_income: 150000.0,
+          current_month_expenditure: 42180.0,
+          total_expenditure_till_now: 482500.0,
+          total_savings_investments: 765000.0
+        },
+        bills_overview: {
+          total_bills_count: 8,
+          paid_bills_count: 5,
+          left_bills_count: 3,
+          total_paid_amount: 34500.0,
+          total_pending_amount: 12850.0
+        },
+        bills: [
+          { id: "bill-1", title: "Electricity & Power (BESCOM)", category: "Bills & Utilities", amount: 3200.0, due_date: "2026-10-28", status: "pending", due_days_left: 6, icon: "⚡" },
+          { id: "bill-2", title: "Airtel Xstream Fiber Broadband", category: "Bills & Utilities", amount: 1499.0, due_date: "2026-11-02", status: "pending", due_days_left: 11, icon: "🌐" },
+          { id: "bill-3", title: "HDFC Regalia Credit Card", category: "Finance", amount: 8151.0, due_date: "2026-11-05", status: "pending", due_days_left: 14, icon: "💳" },
+          { id: "bill-4", title: "Apartment Monthly Rent", category: "Housing", amount: 25000.0, due_date: "2026-10-01", paid_on: "2026-10-01", status: "paid", icon: "🏠" },
+          { id: "bill-5", title: "Piped Natural Gas (GAIL)", category: "Bills & Utilities", amount: 850.0, due_date: "2026-10-04", paid_on: "2026-10-03", status: "paid", icon: "🔥" },
+          { id: "bill-6", title: "Mobile Postpaid Family Plan", category: "Bills & Utilities", amount: 999.0, due_date: "2026-10-08", paid_on: "2026-10-07", status: "paid", icon: "📱" },
+          { id: "bill-7", title: "Society Water & Maintenance", category: "Housing", amount: 2200.0, due_date: "2026-10-10", paid_on: "2026-10-09", status: "paid", icon: "💧" },
+          { id: "bill-8", title: "Cloud Services & Developer Tooling", category: "Work & Subscriptions", amount: 5451.0, due_date: "2026-10-15", paid_on: "2026-10-14", status: "paid", icon: "☁️" }
+        ],
+        advance_tax: {
+          gross_taxable_income: 1800000.0,
+          standard_deduction: 75000.0,
+          net_taxable_income: 1725000.0,
+          estimated_total_tax: 215800.0,
+          tds_credits_deducted: 100000.0,
+          net_advance_tax_payable: 115800.0,
+          schedule: [
+            { installment: "1st Installment (15%)", due_date: "2026-06-15", installment_amount: 17370.0, status: "paid", paid_on: "2026-06-12", notes: "Payment Challan #ITX-48291" },
+            { installment: "2nd Installment (45%)", due_date: "2026-09-15", installment_amount: 34740.0, status: "paid", paid_on: "2026-09-14", notes: "Payment Challan #ITX-93102" },
+            { installment: "3rd Installment (75%)", due_date: "2026-12-15", installment_amount: 34740.0, status: "upcoming", days_remaining: 54, notes: "Next critical statutory tax deadline" },
+            { installment: "4th Installment (100%)", due_date: "2027-03-15", installment_amount: 28950.0, status: "upcoming", days_remaining: 144, notes: "Final FY installment" }
+          ]
+        }
+      };
+      renderProfile();
+    }
+
+    function renderProfile() {
+      if (!profileData) return;
+
+      // Personal Info (with sync to logged-in auth session if available)
+      const auth = JSON.parse(localStorage.getItem('auth') || 'null');
+      const displayName = (auth && auth.name) ? auth.name : profileData.personal.name;
+      const displayEmail = (auth && auth.email) ? auth.email : profileData.personal.email;
+      const initials = (profileData.personal.avatar_initials || displayName.split(' ').map(n => n[0]).join('').substring(0, 2)).toUpperCase();
+
+      profName.textContent = displayName;
+      profOccupation.textContent = profileData.personal.occupation;
+      profLocation.textContent = profileData.personal.location;
+      profEmail.textContent = displayEmail;
+      profPan.textContent = profileData.personal.pan_number;
+
+      if (auth && auth.photoURL) {
+        profAvatar.innerHTML = `<img src="${auth.photoURL}" alt="${displayName}" class="h-full w-full rounded-2xl object-cover" onerror="this.onerror=null; this.parentElement.textContent='${initials}';">`;
+      } else {
+        profAvatar.textContent = initials;
+      }
+
+      // Finances
+      statMonthly.textContent = formatCurrency(profileData.finances.monthly_income);
+      statAnnual.textContent = formatCurrency(profileData.finances.annual_income);
+      statExpenditure.textContent = formatCurrency(profileData.finances.total_expenditure_till_now);
+      statSavings.textContent = formatCurrency(profileData.finances.total_savings_investments);
+
+      if (statMonthExpenditure) {
+        // Prioritize live value from backend or synced store
+        let monthExp = profileData.finances.current_month_expenditure;
+        if (window.RVStore) {
+          const storeOutflow = window.RVStore.getCurrentMonthOutflow();
+          if (storeOutflow) monthExp = storeOutflow;
+        }
+        if (!monthExp) monthExp = 42180.0;
+
+        statMonthExpenditure.textContent = formatCurrency(monthExp);
+        const mIncome = profileData.finances.monthly_income || 150000;
+        const pct = ((monthExp / mIncome) * 100).toFixed(1);
+        const now = new Date();
+        const currentMonthName = now.toLocaleString('en-US', { month: 'long' });
+        if (statMonthExpenditureSub) {
+          statMonthExpenditureSub.textContent = `${currentMonthName} · ${pct}% of income`;
+        }
+      }
+
+      // Bills Overview
+      const bo = profileData.bills_overview;
+      totalBillsPaidAmt.textContent = formatCurrency(bo.total_paid_amount);
+      totalBillsLeftAmt.textContent = formatCurrency(bo.total_pending_amount);
+      badgePaidCount.textContent = `${bo.paid_bills_count} Settled`;
+      badgeLeftCount.textContent = `${bo.left_bills_count} Remaining`;
+      countAll.textContent = String(profileData.bills.length);
+      countLeft.textContent = String(bo.left_bills_count);
+      countPaid.textContent = String(bo.paid_bills_count);
+
+      // Render Bills List
+      renderBillsList();
+
+      // Advance Tax Overview
+      const at = profileData.advance_tax;
+      taxGrossInc.textContent = formatCurrency(at.gross_taxable_income);
+      taxStdDed.textContent = `−${formatCurrency(at.standard_deduction)}`;
+      taxNetTaxable.textContent = formatCurrency(at.net_taxable_income);
+      taxEstimatedTotal.textContent = formatCurrency(at.estimated_total_tax);
+      taxTdsCredits.textContent = `−${formatCurrency(at.tds_credits_deducted)}`;
+      taxNetPayable.textContent = formatCurrency(at.net_advance_tax_payable);
+
+      // Advance Tax Timeline Grid
+      advanceTaxGrid.innerHTML = at.schedule.map(s => {
+        const isPaid = s.status === 'paid';
+        const cardBorder = isPaid
+          ? 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-500/5'
+          : (s.days_remaining <= 60
+              ? 'border-amber-300 dark:border-amber-500/30 bg-amber-50/30 dark:bg-amber-500/5 ring-1 ring-amber-400/30'
+              : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900');
+
+        const badge = isPaid
+          ? '<span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">✓ Paid</span>'
+          : `<span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">⏰ In ${s.days_remaining} days</span>`;
+
+        return `
+          <div class="rounded-2xl border ${cardBorder} p-4 flex flex-col justify-between shadow-sm">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">${s.installment}</span>
+                ${badge}
+              </div>
+              <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">${formatCurrency(s.installment_amount)}</p>
+              <p class="mt-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400">Due: ${s.due_date}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+              ${isPaid ? `<span class="text-emerald-600 dark:text-emerald-400 font-medium">Settled on ${s.paid_on}</span>` : s.notes}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderBillsList() {
+      let filtered = [...profileData.bills];
+      if (activeBillFilter === 'pending') filtered = filtered.filter(b => b.status === 'pending');
+      if (activeBillFilter === 'paid') filtered = filtered.filter(b => b.status === 'paid');
+
+      billsListEl.innerHTML = filtered.map(b => {
+        const isPaid = b.status === 'paid';
+        const statusBadge = isPaid
+          ? '<span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">✓ Settled</span>'
+          : `<span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Due in ${b.due_days_left} days</span>`;
+
+        const actionBtn = !isPaid
+          ? `<button data-pay-bill="${b.id}" class="btn-pay-bill rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+               Mark Paid
+             </button>`
+          : `<span class="text-xs text-slate-400 dark:text-slate-500">Paid on ${b.paid_on || 'Earlier'}</span>`;
+
+        return `
+          <li class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4 px-2 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 rounded-xl transition">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">
+                ${b.icon || '📦'}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">${b.title}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${b.category} · Due ${b.due_date}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end gap-4">
+              <div class="text-right">
+                <p class="text-sm font-bold text-slate-900 dark:text-white">${formatCurrency(b.amount)}</p>
+                ${statusBadge}
+              </div>
+              <div>
+                ${actionBtn}
+              </div>
+            </div>
+          </li>
+        `;
+      }).join('');
+
+      // Wire Mark Paid buttons
+      document.querySelectorAll('.btn-pay-bill').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const billId = btn.getAttribute('data-pay-bill');
+          if (!billId) return;
+
+          try {
+            const res = await fetch(`${API_BASE_URL}/profile/bills/mark-paid`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bill_id: billId })
+            });
+            if (res.ok) {
+              showToast('Bill marked as paid!');
+              await fetchProfile();
+              return;
+            }
+          } catch (err) {
+            console.warn('Backend mark-paid failed, marking locally:', err);
+          }
+
+          // Local update
+          const bill = profileData.bills.find(b => b.id === billId);
+          if (bill && bill.status !== 'paid') {
+            bill.status = 'paid';
+            bill.paid_on = new Date().toISOString().split('T')[0];
+            profileData.bills_overview.paid_bills_count++;
+            profileData.bills_overview.left_bills_count = Math.max(0, profileData.bills_overview.left_bills_count - 1);
+            profileData.bills_overview.total_paid_amount += bill.amount;
+            profileData.bills_overview.total_pending_amount = Math.max(0, profileData.bills_overview.total_pending_amount - bill.amount);
+          }
+          renderProfile();
+          showToast('Bill marked as paid (Local)');
+        });
+      });
+    }
+
+    // Bill Filter buttons
+    const filterButtons = document.querySelectorAll('#bill-filter-tabs button');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeBillFilter = btn.getAttribute('data-bill-filter');
+        filterButtons.forEach(b => {
+          const isActive = b === btn;
+          b.className = isActive
+            ? 'rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+            : 'rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white';
+        });
+        renderBillsList();
+      });
+    });
+
+    // Real-time synchronization when transactions change in other pages/tabs
+    window.addEventListener('rv-store-updated', (e) => {
+      if (e.detail && e.detail.monthOutflow && statMonthExpenditure) {
+        statMonthExpenditure.textContent = formatCurrency(e.detail.monthOutflow);
+        const mIncome = profileData?.finances?.monthly_income || 150000;
+        const pct = ((e.detail.monthOutflow / mIncome) * 100).toFixed(1);
+        const now = new Date();
+        if (statMonthExpenditureSub) {
+          statMonthExpenditureSub.textContent = `${now.toLocaleString('en-US', { month: 'long' })} · ${pct}% of income`;
+        }
+        if (statExpenditure && window.RVStore && e.detail.transactions) {
+          statExpenditure.textContent = formatCurrency(window.RVStore.calculateTotalExpenditure(e.detail.transactions));
+        }
+      }
+    });
+
+    // Start
+    fetchProfile();
+  })();
+  </script>
+</body>
+</html>

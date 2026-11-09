@@ -112,8 +112,11 @@
           <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3
                       dark:bg-slate-800/60">
             <div>
-              <p class="text-xs text-slate-500 dark:text-slate-400">October 2026</p>
-              <p class="text-base font-semibold">₹12,480</p>
+              <div class="flex items-center gap-1.5">
+                <p id="hero-current-month" class="text-xs text-slate-500 dark:text-slate-400">October 2026</p>
+                <span class="text-[10px] text-slate-400">· Month Outflow</span>
+              </div>
+              <p id="hero-month-expenditure" class="text-base font-semibold">₹42,180</p>
             </div>
             <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-medium
                          text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
@@ -162,7 +165,7 @@
           <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Auto-synced
           </p>
-          <p class="text-sm font-semibold">16 Oct · 12:30 PM</p>
+          <p id="hero-sync-timestamp" class="text-sm font-semibold">16 Oct · 12:30 PM</p>
         </div>
       </div>
     </div>
@@ -358,6 +361,43 @@
         });
       })
       .catch(err => console.error('Navbar load failed:', err));
+  </script>
+
+  <!-- ── Live Date & Time Updater for Hero Mock ───────────── -->
+  <script>
+    (function () {
+      function updateLiveDateTime() {
+        const now = new Date();
+
+        // 1. Update the "Auto-synced" floating card
+        const syncEl = document.getElementById('hero-sync-timestamp');
+        if (syncEl) {
+          const day = now.getDate();
+          const monthShort = now.toLocaleString('en-US', { month: 'short' });
+          const timeStr = now.toLocaleString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          syncEl.textContent = `${day} ${monthShort} · ${timeStr}`;
+        }
+
+        // 2. Update the Month & Year header
+        const monthEl = document.getElementById('hero-current-month');
+        if (monthEl) {
+          monthEl.textContent = now.toLocaleString('en-US', {
+            month: 'long',
+            year: 'numeric'
+          });
+        }
+      }
+
+      // Run immediately on page load
+      updateLiveDateTime();
+
+      // Update every 30 seconds to keep live
+      setInterval(updateLiveDateTime, 30000);
+    })();
   </script>
 </body>
 </html>
