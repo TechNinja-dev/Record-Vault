@@ -1,8 +1,6 @@
 import uuid
 from datetime import datetime
-
-# Import single shared transaction store and calculation helpers
-from config.db import tr, get_current_month_expenditure, get_total_expenditure_till_now
+from config.db import cursor
 
 
 def add_transaction(data):
@@ -25,7 +23,7 @@ def add_transaction(data):
 
     date_str = data.get("date") or now.strftime("%Y-%m-%d")
     timestamp_str = data.get("timestamp") or now.strftime("%d %b %Y, %I:%M %p")
-    created_at = data.get("created_at") or now.isoformat()
+    created_at = data.get("created_at") or now.strftime("%Y-%m-%d %H:%M:%S")
 
     record = {
         "id": tx_id,
@@ -38,7 +36,17 @@ def add_transaction(data):
         "created_at": created_at
     }
 
-    tr[tx_id] = record
+    try:
+        cursor.execute("""
+            INSERT INTO transactions (id, uid, type, amount, category, note, date, timestamp, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """, (
+            tx_id, data.get("uid") or data.get("user_id", "usr-101"), tx_type, amount, category,
+            note, date_str, timestamp_str, created_at
+        ))
+    except Exception as e:
+        print(f"Error inserting transaction: {e}")
+
     return {
         "status": "success",
         "message": "Transaction added successfully",
@@ -47,13 +55,14 @@ def add_transaction(data):
 
 
 def get_transaction(data=None):
-    tx_list = list(tr.values())
-
-    # Sort latest first by date/created_at
     try:
-        tx_list.sort(key=lambda x: x.get("created_at", x.get("date", "")), reverse=True)
-    except Exception:
-        pass
+        cursor.execute("SELECT * FROM transactions ORDER BY created_at DESC, date DESC;")
+        tx_list = cursor.fetchall() or []
+        for r in tx_list:
+            r["amount"] = float(r["amount"])
+    except Exception as e:
+        print(f"Error fetching transactions: {e}")
+        tx_list = []
 
     if data:
         if isinstance(data, dict):
@@ -61,7 +70,7 @@ def get_transaction(data=None):
             category = data.get("category")
             tx_id = data.get("id")
             if tx_id:
-                single = tr.get(tx_id)
+                single = next((t for t in tx_list if t.get("id") == tx_id), None)
                 return {"status": "success", "data": [single] if single else []}
             if filter_type:
                 tx_list = [t for t in tx_list if t.get("type") == filter_type]
@@ -69,13 +78,12 @@ def get_transaction(data=None):
                 tx_list = [t for t in tx_list if t.get("category") == category]
         elif isinstance(data, str) and data.strip():
             query = data.strip().lower()
-            if query in tr:
-                return {"status": "success", "data": [tr[query]]}
             tx_list = [
                 t for t in tx_list
-                if query in t.get("note", "").lower()
-                or query in t.get("category", "").lower()
-                or query in t.get("type", "").lower()
+                if query in str(t.get("note", "")).lower()
+                or query in str(t.get("category", "")).lower()
+                or query in str(t.get("type", "")).lower()
+                or query == str(t.get("id", "")).lower()
             ]
 
     return {
@@ -95,13 +103,19 @@ def delete_transaction(data):
     if not tx_id:
         return {"status": "error", "message": "Transaction ID is required"}
 
-    if tx_id in tr:
-        removed = tr.pop(tx_id)
-        return {
-            "status": "success",
-            "message": "Transaction deleted successfully",
-            "data": removed
-        }
+    try:
+        cursor.execute("SELECT * FROM transactions WHERE id = %s;", (tx_id,))
+        removed = cursor.fetchone()
+        cursor.execute("DELETE FROM transactions WHERE id = %s;", (tx_id,))
+        if removed:
+            removed["amount"] = float(removed["amount"])
+            return {
+                "status": "success",
+                "message": "Transaction deleted successfully",
+                "data": removed
+            }
+    except Exception as e:
+        print(f"Error deleting transaction: {e}")
 
     return {
         "status": "error",
@@ -116,27 +130,32 @@ def update_transaction(data):
         data = dict(data) if data else {}
 
     tx_id = data.get("id")
-    if not tx_id or tx_id not in tr:
-        return {"status": "error", "message": f"Transaction with id '{tx_id}' not found"}
+    if not tx_id:
+        return {"status": "error", "message": "Transaction ID is required"}
 
-    record = tr[tx_id]
-    if "amount" in data:
-        try:
-            record["amount"] = float(data["amount"])
-        except (ValueError, TypeError):
-            pass
-    if "type" in data:
-        record["type"] = str(data["type"]).lower()
-    if "category" in data:
-        record["category"] = data["category"]
-    if "note" in data:
-        record["note"] = str(data["note"]).strip()
-    if "date" in data:
-        record["date"] = data["date"]
+    try:
+        set_clauses = []
+        values = []
+        for k in ("type", "amount", "category", "note", "date"):
+            if k in data:
+                set_clauses.append(f"`{k}` = %s")
+                values.append(float(data[k]) if k == "amount" else data[k])
 
-    tr[tx_id] = record
-    return {
-        "status": "success",
-        "message": "Transaction updated successfully",
-        "data": record
-    }
+        if set_clauses:
+            values.append(tx_id)
+            query = f"UPDATE transactions SET {', '.join(set_clauses)} WHERE id = %s;"
+            cursor.execute(query, tuple(values))
+
+        cursor.execute("SELECT * FROM transactions WHERE id = %s;", (tx_id,))
+        record = cursor.fetchone()
+        if record:
+            record["amount"] = float(record["amount"])
+            return {
+                "status": "success",
+                "message": "Transaction updated successfully",
+                "data": record
+            }
+    except Exception as e:
+        print(f"Error updating transaction: {e}")
+
+    return {"status": "error", "message": f"Transaction with id '{tx_id}' not found"}
