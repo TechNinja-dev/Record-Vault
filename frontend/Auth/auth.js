@@ -192,23 +192,85 @@ function initGoogleAuth() {
 }
 
 /**
- * Form submit stubs for standard email/password authentication
+ * Form submit handlers for standard email/password authentication
  */
 function initFormPlaceholders() {
   const loginForm = document.getElementById('form-login');
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = document.getElementById('btn-login-submit');
+      const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+
       const formData = new FormData(loginForm);
       const data = Object.fromEntries(formData.entries());
-      console.log('Login submitted:', { email: data.email, remember: !!data.remember });
+
+      if (!data.email || !data.password) {
+        alert('Please fill in both email and password.');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        submitBtn.innerHTML = `
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Signing in...</span>
+        `;
+      }
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_name: data.email,
+            user_email: data.email,
+            password: data.password
+          })
+        });
+
+        const res = await response.json();
+        console.log('Login response:', res);
+
+        if (response.ok && res && res.data) {
+          const authSession = {
+            uid: res.data.uid,
+            name: res.data.name || (res.data.email ? res.data.email.split('@')[0] : 'User'),
+            email: res.data.email || data.email,
+            photoURL: res.data.picture || ''
+          };
+          localStorage.setItem('auth', JSON.stringify(authSession));
+          console.log('Login successful, redirecting to Home...');
+          window.location.href = '../Home/home.html';
+        } else {
+          alert(res.message || 'Login failed. Please check your credentials.');
+        }
+      } catch (err) {
+        console.error('Error during login:', err);
+        alert('Unable to connect to the server. Please ensure the backend is running.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          submitBtn.innerHTML = originalBtnText;
+        }
+      }
     });
   }
 
   const registerForm = document.getElementById('form-register');
   if (registerForm) {
-    registerForm.addEventListener('submit', (e) => {
+    registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = document.getElementById('btn-register-submit');
+      const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+
       const formData = new FormData(registerForm);
       const data = Object.fromEntries(formData.entries());
 
@@ -217,7 +279,64 @@ function initFormPlaceholders() {
         return;
       }
 
-      console.log('Register submitted:', { name: data.name, email: data.email });
+      if (!data.name || !data.email || !data.password) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        submitBtn.innerHTML = `
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Creating account...</span>
+        `;
+      }
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: data.name,
+            user_name: data.name,
+            email: data.email,
+            user_email: data.email,
+            password: data.password
+          })
+        });
+
+        const res = await response.json();
+        console.log('Register response:', res);
+
+        if (response.ok && res && res.data) {
+          const authSession = {
+            uid: res.data.uid,
+            name: res.data.name || data.name,
+            email: res.data.email || data.email,
+            photoURL: res.data.picture || ''
+          };
+          localStorage.setItem('auth', JSON.stringify(authSession));
+          console.log('Registration successful, redirecting to Home...');
+          window.location.href = '../Home/home.html';
+        } else {
+          alert(res.message || 'Registration failed. Please try again.');
+        }
+      } catch (err) {
+        console.error('Error during registration:', err);
+        alert('Unable to connect to the server. Please ensure the backend is running.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          submitBtn.innerHTML = originalBtnText;
+        }
+      }
     });
   }
 }

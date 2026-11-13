@@ -348,22 +348,11 @@
     </div>
   </footer>
 
-  <!-- ── Navbar loader ──────────────────────────────────── -->
-  <script>
-    fetch('../Navbar/navbar.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('navbar').innerHTML = html;
-        document.querySelectorAll('#navbar script').forEach(old => {
-          const s = document.createElement('script');
-          s.textContent = old.textContent;
-          old.replaceWith(s);
-        });
-      })
-      .catch(err => console.error('Navbar load failed:', err));
-  </script>
+  <!-- ── Reusable Shared Navbar loader & Shared Store ─────── -->
+  <script src="../Navbar/navbar.js"></script>
+  <script src="../Navbar/store.js"></script>
 
-  <!-- ── Live Date & Time Updater for Hero Mock ───────────── -->
+  <!-- ── Live Date, Time & Outflow Updater for Hero Mock ───── -->
   <script>
     (function () {
       function updateLiveDateTime() {
@@ -390,10 +379,25 @@
             year: 'numeric'
           });
         }
+
+        // 3. Update Month Outflow from Shared Store
+        const monthExpEl = document.getElementById('hero-month-expenditure');
+        if (monthExpEl && window.RVStore) {
+          const val = window.RVStore.getCurrentMonthOutflow();
+          monthExpEl.textContent = '₹' + Number(val).toLocaleString('en-IN');
+        }
       }
 
       // Run immediately on page load
       updateLiveDateTime();
+
+      // Listen for reactive store updates
+      window.addEventListener('rv-store-updated', (e) => {
+        const monthExpEl = document.getElementById('hero-month-expenditure');
+        if (e.detail && e.detail.monthOutflow && monthExpEl) {
+          monthExpEl.textContent = '₹' + Number(e.detail.monthOutflow).toLocaleString('en-IN');
+        }
+      });
 
       // Update every 30 seconds to keep live
       setInterval(updateLiveDateTime, 30000);
