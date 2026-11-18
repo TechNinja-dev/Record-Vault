@@ -3,60 +3,67 @@ from datetime import datetime
 from config.db import cursor
 
 
-def add_transaction(data):
-    if hasattr(data, "dict"):
-        data = data.dict()
-    elif not isinstance(data, dict):
-        data = dict(data) if data else {}
+def add_transaction(data: dict):
+    if not data:
+        return {"status": "error", "message": "No data provided"}
 
     tx_id = data.get("id") or f"tx-{uuid.uuid4().hex[:8]}"
-    now = datetime.now()
-
+    uid = data.get("uid") or data.get("user_id")
+    tx_type = str(data.get("type", "expense")).lower()
+    
     try:
         amount = float(data.get("amount", 0.0))
     except (ValueError, TypeError):
         amount = 0.0
 
-    tx_type = str(data.get("type", "expense")).lower()
     category = data.get("category", "Other")
     note = str(data.get("note", "")).strip()
+    wallet_type = data.get("wallet_type") or "UPI"
 
+    now = datetime.now()
     date_str = data.get("date") or now.strftime("%Y-%m-%d")
     timestamp_str = data.get("timestamp") or now.strftime("%d %b %Y, %I:%M %p")
     created_at = data.get("created_at") or now.strftime("%Y-%m-%d %H:%M:%S")
 
     record = {
         "id": tx_id,
+        "uid": uid,
         "type": tx_type,
         "amount": amount,
         "category": category,
         "note": note,
         "date": date_str,
         "timestamp": timestamp_str,
-        "created_at": created_at
+        "created_at": created_at,
+        "wallet_type": wallet_type
     }
 
     try:
         cursor.execute("""
-            INSERT INTO transactions (id, uid, type, amount, category, note, date, timestamp, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+            INSERT INTO transactions (id, uid, type, amount, category, note, date, timestamp, created_at, wallet_type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """, (
-            tx_id, data.get("uid") or data.get("user_id", "usr-101"), tx_type, amount, category,
-            note, date_str, timestamp_str, created_at
+            tx_id, uid, tx_type, amount, category,
+            note, date_str, timestamp_str, created_at, wallet_type
         ))
+        return {
+            "status": "success",
+            "message": "Transaction added successfully",
+            "data": record
+        }
     except Exception as e:
         print(f"Error inserting transaction: {e}")
-
-    return {
-        "status": "success",
-        "message": "Transaction added successfully",
-        "data": record
-    }
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
-def get_transaction(data=None):
+def get_transaction(data):
     try:
-        cursor.execute("SELECT * FROM transactions ORDER BY created_at DESC, date DESC;")
+        uid = data.get('uid')
+        if uid:
+            cursor.execute("SELECT * FROM transactions WHERE uid=%s ORDER BY created_at DESC, date DESC;", (uid,))
         tx_list = cursor.fetchall() or []
         for r in tx_list:
             r["amount"] = float(r["amount"])

@@ -2,12 +2,16 @@ from pydantic import BaseModel
 
 class RegisterUser(BaseModel):
     user_name: str
-    user_email:str
-    password:str
+    user_email: str
+    password: str
 
 class LoginUser(BaseModel):
     user_name:str
     password:str
 
 class GoogleAuth(BaseModel):
-    token:str
+    token: str
+
+class CreatePassword(BaseModel):
+    uid: str
+    password: str
