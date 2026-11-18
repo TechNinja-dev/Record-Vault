@@ -1,0 +1,7 @@
+ Develop a web/mobile-based Personal Finance and Expense Management Platform that helps students and young professionals manage their finances across multiple sources such as cash, UPI, bank accounts, and cards. Users should be able to record or import transactions, categorize expenses, set budgets, track recurring payments, and analyze their spending through interactive dashboards and reports. 
+
+*Sem I- Web Development + Sem II- AI*:
+ Develop a web-based system with following features: User authentication, multiple account/wallet support, manual + CSV/bank-statement import of transactions, categorization (food, travel, bills, etc.), tagging, recurring transactions, budget setting per category with alerts on overspending, dashboards/reports: monthly spend trends, category-wise breakdown (charts), export reports (PDF/Excel). 
+
+*Sem II-AI*:
+ Extend your project by adding AI features - GenAI-powered natural language query: user asks "How much did I spend on food last month compared to March?" and gets an accurate, generated answer (LLM + structured query generation over the transaction database — a text-toSQL/RAG pattern), personalized spending insights & nudges: LLM generates a natural-language monthly summary ("You spent 20% more on food delivery this month, mainly on weekends")

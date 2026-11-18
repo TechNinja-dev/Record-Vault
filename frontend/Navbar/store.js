@@ -1,9 +1,6 @@
 // frontend/Navbar/store.js
 // Single shared client-side store for transactions & monthly outflow
 (function (global) {
-  const BASE_MONTH_OUTFLOW = 37341.0;
-  const BASE_TOTAL_OUTFLOW = 477661.0;
-
   const Store = {
     /**
      * Retrieve locally cached transactions list
@@ -36,27 +33,34 @@
     },
 
     /**
-     * Sum all current expense transactions + baseline
+     * Sum actual expense transactions for the current month
      */
     calculateMonthOutflow(txList) {
-      if (!Array.isArray(txList)) return 42180.0;
+      if (!Array.isArray(txList) || txList.length === 0) return 0.0;
+      const now = new Date();
+      const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
       const expenseSum = txList
-        .filter(t => String(t.type).toLowerCase() === 'expense')
+        .filter(t => {
+          const isExpense = String(t.type || '').toLowerCase() === 'expense';
+          const d = t.date || (t.created_at ? String(t.created_at).split('T')[0] : '');
+          return isExpense && d.startsWith(currentYearMonth);
+        })
         .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      return Math.round((BASE_MONTH_OUTFLOW + expenseSum) * 100) / 100;
+      return Math.round(expenseSum * 100) / 100;
     },
 
     /**
-     * Calculate all-time total expenditure
+     * Calculate actual all-time total expenditure
      */
     calculateTotalExpenditure(txList) {
-      if (!Array.isArray(txList)) return 482500.0;
+      if (!Array.isArray(txList) || txList.length === 0) return 0.0;
       const expenseSum = txList
-        .filter(t => String(t.type).toLowerCase() === 'expense')
+        .filter(t => String(t.type || '').toLowerCase() === 'expense')
         .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      return Math.round((BASE_TOTAL_OUTFLOW + expenseSum) * 100) / 100;
+      return Math.round(expenseSum * 100) / 100;
     },
 
     /**
@@ -64,10 +68,10 @@
      */
     getCurrentMonthOutflow() {
       const stored = localStorage.getItem('rv_current_month_outflow');
-      if (stored && !isNaN(stored)) return Number(stored);
+      if (stored !== null && !isNaN(Number(stored))) return Number(stored);
       const txs = this.getTransactions();
       if (txs) return this.calculateMonthOutflow(txs);
-      return 42180.0;
+      return 0.0;
     }
   };
 

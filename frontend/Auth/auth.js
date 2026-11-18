@@ -102,13 +102,109 @@ async function handleAuthenticatedUser(user) {
     };
 
     localStorage.setItem('auth', JSON.stringify(authSession));
-    console.log('User session saved in localStorage. Redirecting to home...');
+    console.log('User session saved in localStorage.');
 
-    window.location.href = '../Home/home.html';
+    if (backendUserData && backendUserData.needs_password) {
+      console.log('Google user has no password set. Showing create password modal...');
+      showCreatePasswordModal(authSession.uid, () => {
+        window.location.href = '../Home/home.html';
+      });
+    } else {
+      console.log('Redirecting to home...');
+      window.location.href = '../Home/home.html';
+    }
   } catch (err) {
     console.error('Error handling authenticated user:', err);
     isAuthHandling = false;
   }
+}
+
+/**
+ * Modal prompt to create a password for first-time or passwordless Google Auth users
+ */
+function showCreatePasswordModal(uid, onComplete) {
+  const existingModal = document.getElementById('modal-create-password');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'modal-create-password';
+  modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4';
+  modal.innerHTML = `
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl transition-all">
+      <div class="text-center mb-5">
+        <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 mb-3">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Create a Password</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          Set a password so you can also log in manually using your email anytime.
+        </p>
+      </div>
+
+      <form id="form-create-password-modal" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">New Password</label>
+          <input type="password" id="modal-new-pwd" required minlength="6" placeholder="At least 6 characters" class="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-4 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Confirm Password</label>
+          <input type="password" id="modal-confirm-pwd" required minlength="6" placeholder="Re-enter password" class="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-4 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div id="modal-pwd-error" class="hidden text-xs text-rose-500 font-medium"></div>
+        <div class="flex items-center gap-3 pt-2">
+          <button type="button" id="btn-skip-create-pwd" class="flex-1 rounded-xl border border-slate-200 dark:border-slate-800 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+            Skip for now
+          </button>
+          <button type="submit" id="btn-submit-create-pwd" class="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+            Set Password
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const form = document.getElementById('form-create-password-modal');
+  const skipBtn = document.getElementById('btn-skip-create-pwd');
+  const errorEl = document.getElementById('modal-pwd-error');
+  const submitBtn = document.getElementById('btn-submit-create-pwd');
+
+  skipBtn.addEventListener('click', () => {
+    modal.remove();
+    onComplete();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const p1 = document.getElementById('modal-new-pwd').value;
+    const p2 = document.getElementById('modal-confirm-pwd').value;
+
+    if (p1 !== p2) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/auth/create_pwd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: uid, password: p1 })
+      });
+      const res = await response.json();
+      console.log('Password set response:', res);
+    } catch (err) {
+      console.warn('Failed to call create_pwd:', err);
+    }
+
+    modal.remove();
+    onComplete();
+  });
 }
 
 /**
@@ -135,12 +231,12 @@ function initGoogleAuth() {
   googleBtn.addEventListener('click', async (e) => {
     e.preventDefault();
 
+    ensureFirebaseInitialized();
+
     if (typeof firebase === 'undefined' || !firebase.auth) {
       alert('Firebase SDK is loading or unavailable. Please ensure you are connected to the internet.');
       return;
     }
-
-    ensureFirebaseInitialized();
     isGoogleBtnClicked = true;
 
     const originalContent = googleBtn.innerHTML;
